@@ -1,0 +1,714 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majandusmäng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        html, body {
+            background-color: #0a0a0a;
+            min-height: 100vh;
+        }
+        
+        /* Progress dots */
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: #252525;
+            border: 2px solid #3a3a3a;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dot.filled {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+            animation: dotPulse 0.6s ease-out;
+        }
+        
+        @keyframes dotPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
+            50% { transform: scale(1.4); box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+        }
+        
+        /* Company cards */
+        .company-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #151515 100%);
+            border: 2px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Card feedback states */
+        .company-card.selected-correct {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.4), 0 0 80px rgba(34, 197, 94, 0.2) !important;
+            transform: scale(1.05) !important;
+            animation: correctGlow 0.6s ease-out;
+        }
+        
+        .company-card.selected-wrong {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.4), 0 0 80px rgba(239, 68, 68, 0.2) !important;
+            transform: scale(1.05) !important;
+            animation: wrongShake 0.6s ease-out;
+        }
+        
+        .company-card.was-correct {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3) !important;
+            animation: pulseCorrect 0.8s ease-out;
+        }
+        
+        .company-card.dimmed {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+        
+        @keyframes correctGlow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1.05); }
+        }
+        
+        @keyframes wrongShake {
+            0%, 100% { transform: scale(1.05) translateX(0); }
+            20% { transform: scale(1.05) translateX(-8px); }
+            40% { transform: scale(1.05) translateX(8px); }
+            60% { transform: scale(1.05) translateX(-8px); }
+            80% { transform: scale(1.05) translateX(8px); }
+        }
+        
+        @keyframes pulseCorrect {
+            0% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+            50% { box-shadow: 0 0 60px rgba(34, 197, 94, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
+        }
+        
+        .company-card::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .company-card::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .company-card::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 2px;
+        }
+        
+        /* Field row with icon */
+        .field-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #1f1f1f;
+            gap: 0.75rem;
+        }
+        
+        .field-row:last-child {
+            border-bottom: none;
+        }
+        
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #888;
+            flex-shrink: 0;
+            min-width: fit-content;
+        }
+        
+        .field-value {
+            color: #d1d5db;
+            text-align: right;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .field-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: #666;
+        }
+        
+        .company-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .company-card:hover::before {
+            opacity: 1;
+        }
+        
+        .company-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: #3b82f6;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.15);
+        }
+        
+        .company-card:active {
+            transform: translateY(-2px) scale(0.99);
+        }
+        
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        /* Feedback animations */
+        .feedback-correct {
+            animation: correctPulse 0.5s ease-out;
+        }
+        
+        @keyframes correctPulse {
+            0% { background-color: #1a1a1a; }
+            50% { background-color: rgba(34, 197, 94, 0.2); }
+            100% { background-color: #1a1a1a; }
+        }
+        
+        .feedback-wrong {
+            animation: wrongShake 0.5s ease-out;
+        }
+        
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+        
+        /* Continue button */
+        .continue-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .continue-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Reset button */
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #3a3a3a;
+            color: #666;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+        }
+        
+        .reset-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+        }
+        
+        /* Entrance animations */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .fade-in-up-delay-1 {
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+        
+        .fade-in-up-delay-2 {
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Card entrance - simple scale */
+        .card-enter {
+            animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        
+        .card-enter-delay {
+            animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+        }
+        
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* VS divider */
+        .vs-divider {
+            color: #444;
+        }
+        
+        /* Promo popup */
+        .promo-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: overlayFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .promo-modal {
+            background: linear-gradient(145deg, #1f1f1f 0%, #151515 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 480px;
+            text-align: center;
+            animation: modalPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+        }
+        
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .promo-code {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .promo-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+        }
+        
+        .promo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+        }
+        
+        /* Auto-advance progress bar (top, full width) */
+        .top-progress-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            z-index: 1200;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+        }
+
+        .top-progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transform-origin: left;
+            animation: progressShrink 2s linear forwards;
+        }
+        
+        @keyframes progressShrink {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+        
+        /* Floating particles background */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 15s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Legal form badge */
+        .legal-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #2a2a2a;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    
+    <!-- Floating particles -->
+    <div id="particles"></div>
+
+    {% if feedback and not show_promo %}
+    <!-- Auto-advance top progress -->
+    <div class="top-progress-wrap">
+        <div class="top-progress-bar"></div>
+    </div>
+    {% endif %}
+    
+    <div class="min-h-screen flex flex-col items-center justify-center p-8 md:p-12">
+        
+        <!-- Game Screen -->
+
+        <!-- Reward hint -->
+        <div class="mb-6 -mt-3 fade-in-up-delay-1">
+            <div class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-[#232323] bg-[#111111]/60 text-sm text-gray-400">
+                <i data-lucide="gift" class="w-4 h-4 text-[#8b5cf6]"></i>
+                <span>Kogu <span class="text-white font-semibold">5 punkti</span> ja saa auhind</span>
+            </div>
+        </div>
+        
+        {% if question %}
+        <!-- Question -->
+        <h1 class="text-xl md:text-2xl font-medium text-center text-white mb-8 max-w-2xl leading-relaxed fade-in-up-delay-2">
+            {{ question }}
+        </h1>
+
+        <!-- Progress Dots -->
+        <div class="flex gap-3 mb-4 fade-in-up">
+            {% for i in "12345" %}
+                <div class="dot {% if forloop.counter <= score %}filled{% endif %}"></div>
+            {% endfor %}
+        </div>
+        
+        <!-- Score Text -->
+        <p class="text-gray-500 text-sm mb-6 fade-in-up-delay-1">{{ score }} punkti</p>
+        
+        <!-- Company Cards -->
+        <div class="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
+            
+            <!-- Card A -->
+            <form method="post" class="flex-1 card-enter">
+                {% csrf_token %}
+                <input type="hidden" name="answer" value="a">
+                <button type="submit" class="company-card w-full text-left {% if feedback.selected == 'a' and feedback.correct %}selected-correct{% elif feedback.selected == 'a' and not feedback.correct %}selected-wrong{% elif feedback.correct_position == 'a' and feedback.selected != 'a' %}was-correct{% elif feedback and feedback.selected != 'a' %}dimmed{% endif %}" 
+                        onmousemove="updateMousePosition(event, this)"
+                        onclick="createRipple(event, this)"
+                        {% if feedback %}disabled{% endif %}>
+                    <h2 class="text-lg font-semibold text-white mb-3 leading-tight">{{ company_a.name|truncatechars:40 }}</h2>
+                    <span class="legal-badge">{{ company_a.legal_form }}</span>
+                    
+                    <div class="mt-4 text-sm">
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="hash" class="field-icon"></i> Registrikood</span>
+                            <span class="field-value">{{ company_a.registry_code }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="calendar" class="field-icon"></i> Asutatud</span>
+                            <span class="field-value">{{ company_a.registered_date }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="map-pin" class="field-icon"></i> Piirkond</span>
+                            <span class="field-value">{{ company_a.county }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="briefcase" class="field-icon"></i> Tegevusala</span>
+                            <span class="field-value">{{ company_a.activity }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="user" class="field-icon"></i> Juht</span>
+                            <span class="field-value">{{ company_a.ceo }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="users" class="field-icon"></i> Juhatus</span>
+                            <span class="field-value">{{ company_a.board_members|truncatechars:50 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="users-round" class="field-icon"></i> Töötajaid</span>
+                            <span class="field-value font-medium">{{ company_a.employees|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="banknote" class="field-icon"></i> Käive</span>
+                            <span class="field-value font-medium">€{{ company_a.revenue|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="trending-up" class="field-icon"></i> Kasum</span>
+                            <span class="field-value font-medium">€{{ company_a.profit|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="wallet" class="field-icon"></i> Tööjõukulud</span>
+                            <span class="field-value font-medium">€{{ company_a.labor_taxes|floatformat:0 }}</span>
+                        </div>
+                        {% if company_a.vat_number %}
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="file-text" class="field-icon"></i> KMKR</span>
+                            <span class="field-value">{{ company_a.vat_number }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </button>
+            </form>
+            
+            <!-- VS Divider -->
+            <div class="hidden md:flex items-center justify-center">
+                <span class="text-gray-500 text-xl font-bold vs-divider">VS</span>
+            </div>
+            
+            <!-- Card B -->
+            <form method="post" class="flex-1 card-enter-delay">
+                {% csrf_token %}
+                <input type="hidden" name="answer" value="b">
+                <button type="submit" class="company-card w-full text-left {% if feedback.selected == 'b' and feedback.correct %}selected-correct{% elif feedback.selected == 'b' and not feedback.correct %}selected-wrong{% elif feedback.correct_position == 'b' and feedback.selected != 'b' %}was-correct{% elif feedback and feedback.selected != 'b' %}dimmed{% endif %}"
+                        onmousemove="updateMousePosition(event, this)"
+                        onclick="createRipple(event, this)"
+                        {% if feedback %}disabled{% endif %}>
+                    <h2 class="text-lg font-semibold text-white mb-3 leading-tight">{{ company_b.name|truncatechars:40 }}</h2>
+                    <span class="legal-badge">{{ company_b.legal_form }}</span>
+                    
+                    <div class="mt-4 text-sm">
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="hash" class="field-icon"></i> Registrikood</span>
+                            <span class="field-value">{{ company_b.registry_code }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="calendar" class="field-icon"></i> Asutatud</span>
+                            <span class="field-value">{{ company_b.registered_date }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="map-pin" class="field-icon"></i> Piirkond</span>
+                            <span class="field-value">{{ company_b.county }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="briefcase" class="field-icon"></i> Tegevusala</span>
+                            <span class="field-value">{{ company_b.activity }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="user" class="field-icon"></i> Juht</span>
+                            <span class="field-value">{{ company_b.ceo }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="users" class="field-icon"></i> Juhatus</span>
+                            <span class="field-value">{{ company_b.board_members|truncatechars:50 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="users-round" class="field-icon"></i> Töötajaid</span>
+                            <span class="field-value font-medium">{{ company_b.employees|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="banknote" class="field-icon"></i> Käive</span>
+                            <span class="field-value font-medium">€{{ company_b.revenue|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="trending-up" class="field-icon"></i> Kasum</span>
+                            <span class="field-value font-medium">€{{ company_b.profit|floatformat:0 }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="wallet" class="field-icon"></i> Tööjõukulud</span>
+                            <span class="field-value font-medium">€{{ company_b.labor_taxes|floatformat:0 }}</span>
+                        </div>
+                        {% if company_b.vat_number %}
+                        <div class="field-row">
+                            <span class="field-label"><i data-lucide="file-text" class="field-icon"></i> KMKR</span>
+                            <span class="field-value">{{ company_b.vat_number }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </button>
+            </form>
+            
+        </div>
+        
+        {% elif error %}
+        <p class="text-red-400 text-center">{{ error }}</p>
+        {% endif %}
+        
+        <!-- Reset Button -->
+        <div class="mt-10">
+            <a href="{% url 'reset_game' %}" class="reset-btn text-sm py-2 px-4">
+                Alusta uuesti
+            </a>
+        </div>
+        
+        {% if show_promo %}
+        <!-- Promo Popup -->
+        <div class="promo-overlay" id="promo-overlay">
+            <div class="promo-modal">
+                <div class="text-5xl mb-4">🎉</div>
+                <h2 class="text-2xl font-bold text-white mb-2">Tubli töö!</h2>
+                <p class="text-gray-400 mb-4">Kogusid 5 punkti! Siin on sinu auhind:</p>
+                <div class="promo-code">KONTAKT25</div>
+                <p class="text-gray-300 text-lg mb-6">25% soodustust igalt ostult!</p>
+                <button class="promo-btn" onclick="closePromo()">
+                    Jätka mängimist
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+    
+    <script>
+        // Update mouse position for glow effect
+        function updateMousePosition(e, element) {
+            const rect = element.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            element.style.setProperty('--mouse-x', x + '%');
+            element.style.setProperty('--mouse-y', y + '%');
+        }
+        
+        // Create ripple effect on click
+        function createRipple(e, element) {
+            if (element.disabled) return;
+            const rect = element.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = (e.clientX - rect.left) + 'px';
+            ripple.style.top = (e.clientY - rect.top) + 'px';
+            ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
+            element.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+        
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Close promo popup and continue game
+        function closePromo() {
+            const overlay = document.getElementById('promo-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    // Redirect to continue the game (clear feedback and generate new question)
+                    window.location.href = "{% url 'index' %}?continue=1";
+                }, 300);
+            }
+        }
+        
+        // Auto-advance after feedback
+        {% if feedback and not show_promo %}
+        setTimeout(() => {
+            window.location.href = "{% url 'index' %}";
+        }, 2000);
+        {% endif %}
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            createParticles();
+        });
+    </script>
+    
+</body>
+</html>
