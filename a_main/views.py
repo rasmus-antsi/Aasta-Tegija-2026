@@ -445,6 +445,7 @@ def index(request):
         current_q = request.session.get('current_question')
         if current_q:
             context['question'] = current_q['text']
+            context['question_type'] = current_q.get('type')
             try:
                 company_a = Company.objects.get(id=current_q['company_a_id'])
                 company_b = Company.objects.get(id=current_q['company_b_id'])
@@ -473,6 +474,10 @@ def index(request):
         context['question'] = question['text']
         context['company_a'] = question['company_a']
         context['company_b'] = question['company_b']
+        # Get question type from session
+        current_q = request.session.get('current_question')
+        if current_q:
+            context['question_type'] = current_q.get('type')
     else:
         context['error'] = 'Ei suutnud küsimust genereerida. Proovi uuesti.'
     

@@ -1,5 +1,7 @@
 # Majandusmäng - Estonian Business Quiz Game
 
+🏆 **Winner of First Place in the Competition!** 🏆
+
 A fun, interactive quiz game that tests your knowledge of Estonian businesses. Answer questions about companies from the Estonian Business Register and earn points to unlock rewards!
 
 ## Features

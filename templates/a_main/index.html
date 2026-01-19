@@ -495,7 +495,7 @@
                         onclick="createRipple(event, this)"
                         {% if feedback %}disabled{% endif %}>
                     <h2 class="text-lg font-semibold text-white mb-3 leading-tight">{{ company_a.name|truncatechars:40 }}</h2>
-                    <span class="legal-badge">{{ company_a.legal_form }}</span>
+                    <span class="legal-badge">{% if feedback or question_type != 'legal_form' %}{{ company_a.legal_form }}{% else %}?{% endif %}</span>
                     
                     <div class="mt-4 text-sm">
                         <div class="field-row">
@@ -504,19 +504,19 @@
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="calendar" class="field-icon"></i> Asutatud</span>
-                            <span class="field-value">{{ company_a.registered_date }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'age' %}{{ company_a.registered_date }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="map-pin" class="field-icon"></i> Piirkond</span>
-                            <span class="field-value">{{ company_a.county }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'county' %}{{ company_a.county }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="briefcase" class="field-icon"></i> Tegevusala</span>
-                            <span class="field-value">{{ company_a.activity }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'activity' %}{{ company_a.activity }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="user" class="field-icon"></i> Juht</span>
-                            <span class="field-value">{{ company_a.ceo }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'ceo' %}{{ company_a.ceo }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="users" class="field-icon"></i> Juhatus</span>
@@ -524,24 +524,24 @@
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="users-round" class="field-icon"></i> Töötajaid</span>
-                            <span class="field-value font-medium">{{ company_a.employees|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'employees' %}{{ company_a.employees|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="banknote" class="field-icon"></i> Käive</span>
-                            <span class="field-value font-medium">€{{ company_a.revenue|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'revenue' %}€{{ company_a.revenue|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="trending-up" class="field-icon"></i> Kasum</span>
-                            <span class="field-value font-medium">€{{ company_a.profit|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'profit' %}€{{ company_a.profit|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="wallet" class="field-icon"></i> Tööjõukulud</span>
-                            <span class="field-value font-medium">€{{ company_a.labor_taxes|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'labor_taxes' %}€{{ company_a.labor_taxes|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         {% if company_a.vat_number %}
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="file-text" class="field-icon"></i> KMKR</span>
-                            <span class="field-value">{{ company_a.vat_number }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'vat' %}{{ company_a.vat_number }}{% else %}?{% endif %}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -562,7 +562,7 @@
                         onclick="createRipple(event, this)"
                         {% if feedback %}disabled{% endif %}>
                     <h2 class="text-lg font-semibold text-white mb-3 leading-tight">{{ company_b.name|truncatechars:40 }}</h2>
-                    <span class="legal-badge">{{ company_b.legal_form }}</span>
+                    <span class="legal-badge">{% if feedback or question_type != 'legal_form' %}{{ company_b.legal_form }}{% else %}?{% endif %}</span>
                     
                     <div class="mt-4 text-sm">
                         <div class="field-row">
@@ -571,19 +571,19 @@
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="calendar" class="field-icon"></i> Asutatud</span>
-                            <span class="field-value">{{ company_b.registered_date }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'age' %}{{ company_b.registered_date }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="map-pin" class="field-icon"></i> Piirkond</span>
-                            <span class="field-value">{{ company_b.county }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'county' %}{{ company_b.county }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="briefcase" class="field-icon"></i> Tegevusala</span>
-                            <span class="field-value">{{ company_b.activity }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'activity' %}{{ company_b.activity }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="user" class="field-icon"></i> Juht</span>
-                            <span class="field-value">{{ company_b.ceo }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'ceo' %}{{ company_b.ceo }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="users" class="field-icon"></i> Juhatus</span>
@@ -591,24 +591,24 @@
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="users-round" class="field-icon"></i> Töötajaid</span>
-                            <span class="field-value font-medium">{{ company_b.employees|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'employees' %}{{ company_b.employees|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="banknote" class="field-icon"></i> Käive</span>
-                            <span class="field-value font-medium">€{{ company_b.revenue|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'revenue' %}€{{ company_b.revenue|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="trending-up" class="field-icon"></i> Kasum</span>
-                            <span class="field-value font-medium">€{{ company_b.profit|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'profit' %}€{{ company_b.profit|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="wallet" class="field-icon"></i> Tööjõukulud</span>
-                            <span class="field-value font-medium">€{{ company_b.labor_taxes|floatformat:0 }}</span>
+                            <span class="field-value font-medium">{% if feedback or question_type != 'labor_taxes' %}€{{ company_b.labor_taxes|floatformat:0 }}{% else %}?{% endif %}</span>
                         </div>
                         {% if company_b.vat_number %}
                         <div class="field-row">
                             <span class="field-label"><i data-lucide="file-text" class="field-icon"></i> KMKR</span>
-                            <span class="field-value">{{ company_b.vat_number }}</span>
+                            <span class="field-value">{% if feedback or question_type != 'vat' %}{{ company_b.vat_number }}{% else %}?{% endif %}</span>
                         </div>
                         {% endif %}
                     </div>
