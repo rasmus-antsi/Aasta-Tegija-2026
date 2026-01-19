@@ -646,6 +646,15 @@
         
     </div>
     
+    {% if feedback and not show_promo %}
+    <script>
+        // Auto-advance after feedback
+        setTimeout(function() {
+            window.location.href = "{% url 'index' %}";
+        }, 2000);
+    </script>
+    {% endif %}
+    
     <script>
         // Update mouse position for glow effect
         function updateMousePosition(e, element) {
@@ -689,22 +698,15 @@
             const overlay = document.getElementById('promo-overlay');
             if (overlay) {
                 overlay.style.opacity = '0';
-                setTimeout(() => {
+                setTimeout(function() {
                     // Redirect to continue the game (clear feedback and generate new question)
                     window.location.href = "{% url 'index' %}?continue=1";
                 }, 300);
             }
         }
         
-        // Auto-advance after feedback
-        {% if feedback and not show_promo %}
-        setTimeout(() => {
-            window.location.href = "{% url 'index' %}";
-        }, 2000);
-        {% endif %}
-        
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
             createParticles();
         });
